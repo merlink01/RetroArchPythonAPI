@@ -8,7 +8,7 @@ Example Usage:
 
 RETROAPI = RetroArch('/usr/bin/retroarch','settings','settings/bios','settings/controller')
 
-RETROAPI.start("<Game Path>","<Libretro Plugin Path>")
+RETROAPI.start("Game Path","Libretro Plugin Path")
 
 RETROAPI.toggle_fullscreen()
 
