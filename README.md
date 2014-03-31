@@ -6,7 +6,9 @@ A Python API for RetroArch (libretro)
 
 Example Usage:
 
-RETROAPI = RetroArch(retroarch_path='/usr/bin/retroarch',settings_path='settings',bios_path='settings/bios',controller_path='settings/controller',resolution='800x600',start_fullscreen=True)
+RETROAPI = RetroArch(retroarch_path='/usr/bin/retroarch',settings_path='settings'\ <br>
+                     ,bios_path='settings/bios',controller_path='settings/controller'\ <br>
+                     ,resolution='800x600',start_fullscreen=True)
 
 
 RETROAPI.start("Game Path","Libretro Plugin Path")
