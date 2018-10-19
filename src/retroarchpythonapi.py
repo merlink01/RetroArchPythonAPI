@@ -247,21 +247,20 @@ class RetroArchPythonApi(object):
         self._process.stdin.write('PAUSE_TOGGLE\n')
         time.sleep(0.1)
 
-        answer = self._stderr_queue.get()
-        if 'Paused.' in answer:
-            self.logger.info('Paused')
-            self._pause = True
-            return 'paused'
+        for _ in xrange(len(self._stderr_queue.queue)):
+            answer = self._stderr_queue.get()
+            if "Paused" in answer:
+                self.logger.info('Paused')
+                self._pause = True
+                return 'paused'
+            elif "Unpaused" in answer:
+                self.logger.info('Unpaused')
+                self._pause = False
+                return 'unpaused'
 
-        elif 'Unpaused.' in answer:
-            self.logger.info('Unpaused')
-            self._pause = False
-            return 'unpaused'
-
-        else:
-            self.logger.warning(answer)
-            self._pause = False
-            return False
+        self.logger.warning(answer)
+        self._pause = False
+        return False
 
     def toggle_fullscreen(self):
 
@@ -327,16 +326,16 @@ class RetroArchPythonApi(object):
 
         self._process.stdin.write('LOAD_STATE\n')
 
-        self._stderr_queue.get()
-        self._stderr_queue.get()
-        answer = self._stderr_queue.get()
+        for _ in xrange(len(self._stderr_queue.queue)):
+            answer = self._stderr_queue.get()
+            if 'State size' in answer:
+                self.logger.info('Done: Loaded State')
+                return True
+            elif 'Failed to load state' in answer:
+                break
 
-        if 'Failed to load state' in answer:
-            self.logger.info('Error: Load State Failed')
-            return False
-        elif 'Loaded state from slot' in answer:
-            self.logger.info('Done: Loaded State')
-            return True
+        self.logger.info('Error: Load State Failed')
+        return False
 
     def _clear_stderr_queue(self):
 
@@ -372,21 +371,16 @@ class RetroArchPythonApi(object):
         time.sleep(0.1)
 
         # Recieve Infos
-        answer = self._stderr_queue.get()
+        for _ in xrange(len(self._stderr_queue.queue)):
+            answer = self._stderr_queue.get()
+            if 'Saving state' in answer:
+                break
+
         try:
             save_path = answer.split('"')[1]
         except:
             self.logger.error('Didnt recieve correct Infos from Stderr')
             self.logger.error('Got: %s' % answer)
-            # Restore Pause Mode
-            if toggle_pause:
-                self.toggle_pause()
-            return False
-        self._stderr_queue.get()
-        answer = self._stderr_queue.get()
-
-        if 'Saved state to slot' not in answer:
-            self.logger.error('Saving State Failed')
             # Restore Pause Mode
             if toggle_pause:
                 self.toggle_pause()
@@ -419,9 +413,14 @@ class RetroArchPythonApi(object):
             self.toggle_pause()
 
         self._process.stdin.write('RESET\n')
+        time.sleep(0.3)
 
-        answer = self._stderr_queue.get()
-        if 'Resetting game' in answer:
+        for _ in xrange(len(self._stderr_queue.queue)):
+            answer = self._stderr_queue.get()
+            if 'Reset' in answer:
+                break
+
+        if 'Reset' in answer:
             self.logger.info('Reset')
             return True
         else:
